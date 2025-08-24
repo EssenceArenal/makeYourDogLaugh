@@ -6,7 +6,7 @@ import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import contentJson from "../../data/content.json";
 
-// Types for your JSON content
+// Type for content.json
 interface ContentData {
   exercises: { description: string }[];
   quotes: string[];
@@ -20,7 +20,7 @@ const dogImages = [
   "dog1.jpg",
   "dog2.jpg",
   "dog3.jpg",
-  // Add all your other images here
+  // Add all your other image filenames here
 ];
 
 export default function Home() {
