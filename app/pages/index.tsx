@@ -5,8 +5,8 @@ import path from "path";
 import fs from "fs";
 import { GetStaticProps } from "next";
 import { exercises, quotes } from "../data/content";
-import { auth } from "../lib/firebase";
-import { saveUserData } from "../lib/airtable";
+import { auth } from "../../src/lib/firebase";
+import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
 interface Props {
