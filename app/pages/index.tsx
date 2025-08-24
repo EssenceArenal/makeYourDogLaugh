@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import DogImage from "../components/DogImage";
+import Image from "next/image"; // Use Next.js Image
 import { exercises, quotes } from "../data/content";
 import { auth } from "../firebase";
 import { saveUserData } from "../airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+
+// Array of your dog image filenames in /public/images/dogs
+const dogImages = [
+  "dog1.jpg",
+  "dog2.jpg",
+  "dog3.jpg",
+  // add all your images here
+];
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -46,7 +54,19 @@ export default function Home() {
 
       {greeting && <h2 className="text-xl mb-2">{greeting}</h2>}
 
-      <DogImage />
+      {/* Render all dog images */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {dogImages.map((img) => (
+          <Image
+            key={img}
+            src={`/images/dogs/${img}`}
+            alt={img}
+            width={200}
+            height={200}
+            className="rounded"
+          />
+        ))}
+      </div>
 
       <h2 className="text-lg font-semibold mt-4">Today's Exercise</h2>
       <p>{randomExercise.description}</p>
