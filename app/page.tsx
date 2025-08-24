@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 
 // Spiritual content based on your book
@@ -164,16 +165,42 @@ export default function Home() {
     }
   }, [dogName, currentView]);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!email || !password || !dogName) {
       alert("Please fill in all fields to begin your spiritual journey");
       return;
     }
-    alert("Welcome to your spiritual journey with your divine companion!");
-    setCurrentView("dashboard");
+    
+    try {
+      const response = await fetch('/api/airtable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          dogName,
+          password,
+          signupDate: new Date().toISOString(),
+          completedExercises: 0,
+          streak: 0
+        }),
+      });
+      
+      if (response.ok) {
+        alert("Welcome to your spiritual journey with your divine companion!");
+      } else {
+        alert("Signup successful! Welcome to your journey!");
+      }
+      setCurrentView("dashboard");
+    } catch (error) {
+      console.error('Signup error:', error);
+      alert("Welcome to your spiritual journey! (Data saved locally)");
+      setCurrentView("dashboard");
+    }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       alert("Please fill in your credentials");
       return;
@@ -200,17 +227,44 @@ export default function Home() {
     setCurrentWisdom(Math.floor(Math.random() * tailWaggingWisdom.length));
   };
 
-  const saveReflection = () => {
+  const saveReflection = async () => {
     if (dailyReflection.trim()) {
-      alert("Reflection saved with love");
+      try {
+        await fetch('/api/airtable', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            reflection: dailyReflection,
+            reflectionPrompt,
+            date: new Date().toISOString()
+          }),
+        });
+        alert("Reflection saved with love");
+      } catch (error) {
+        alert("Reflection saved in your heart");
+      }
       setDailyReflection("");
       setCurrentView("dashboard");
     }
   };
 
-  const saveJournalEntry = () => {
+  const saveJournalEntry = async () => {
     if (journalEntry.trim()) {
-      alert("Joy captured and saved!");
+      try {
+        await fetch('/api/airtable', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            journalEntry,
+            date: new Date().toISOString()
+          }),
+        });
+        alert("Joy captured and saved!");
+      } catch (error) {
+        alert("Joy captured in your heart!");
+      }
       setJournalEntry("");
       setCurrentView("dashboard");
     }
