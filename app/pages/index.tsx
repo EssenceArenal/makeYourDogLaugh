@@ -1,38 +1,54 @@
+// pages/index.tsx
 import React, { useState, useEffect } from "react";
-import Image from "next/image"; // Use Next.js Image
+import Image from "next/image";
+import path from "path";
+import fs from "fs";
+import { GetStaticProps } from "next";
 import { exercises, quotes } from "../data/content";
-import { auth } from "../firebase";
-import { saveUserData } from "../airtable";
+import { auth } from "../lib/firebase";
+import { saveUserData } from "../lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
-// Array of your dog image filenames in /public/images/dogs
-const dogImages = [
-  "dog1.jpg",
-  "dog2.jpg",
-  "dog3.jpg",
-  // add all your images here
-];
+interface Props {
+  dogImages: string[];
+}
 
-export default function Home() {
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  // Read all files from public/images/dogs
+  const imagesDir = path.join(process.cwd(), "public/images/dogs");
+  const dogImages = fs.existsSync(imagesDir) ? fs.readdirSync(imagesDir) : [];
+  return { props: { dogImages } };
+};
+
+export default function Home({ dogImages }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dogName, setDogName] = useState("");
-  const [journal, setJournal] = useState("");
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
-    if(dogName) setGreeting(`Ready to laugh with ${dogName} today?`);
+    if (dogName) setGreeting(`Ready to laugh with ${dogName} today?`);
   }, [dogName]);
 
   const handleSignup = async () => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await saveUserData({ email, dogName, journalEntry: "" });
-    alert("Signed up!");
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      await saveUserData({ email, dogName, journalEntry: "" });
+      alert("Signed up successfully!");
+      setGreeting(`Ready to laugh with ${dogName} today?`);
+    } catch (error: any) {
+      alert(`Signup error: ${error.message}`);
+    }
   };
 
   const handleLogin = async () => {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("Logged in!");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert("Logged in successfully!");
+      setGreeting(`Ready to laugh with ${dogName} today?`);
+    } catch (error: any) {
+      alert(`Login error: ${error.message}`);
+    }
   };
 
   const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
@@ -44,17 +60,43 @@ export default function Home() {
 
       {!greeting && (
         <>
-          <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="border p-2 w-full mb-2" />
-          <input placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} className="border p-2 w-full mb-2" />
-          <input placeholder="Dog Name" value={dogName} onChange={e => setDogName(e.target.value)} className="border p-2 w-full mb-2" />
-          <button onClick={handleSignup} className="bg-yellow-300 p-2 rounded w-full mb-2">Sign Up</button>
-          <button onClick={handleLogin} className="bg-pink-300 p-2 rounded w-full mb-4">Login</button>
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="border p-2 w-full mb-2"
+          />
+          <input
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="border p-2 w-full mb-2"
+          />
+          <input
+            placeholder="Dog Name"
+            value={dogName}
+            onChange={(e) => setDogName(e.target.value)}
+            className="border p-2 w-full mb-2"
+          />
+          <button
+            onClick={handleSignup}
+            className="bg-yellow-300 p-2 rounded w-full mb-2"
+          >
+            Sign Up
+          </button>
+          <button
+            onClick={handleLogin}
+            className="bg-pink-300 p-2 rounded w-full mb-4"
+          >
+            Login
+          </button>
         </>
       )}
 
       {greeting && <h2 className="text-xl mb-2">{greeting}</h2>}
 
-      {/* Render all dog images */}
+      {/* Render all dog images dynamically */}
       <div className="flex flex-wrap gap-2 mb-4">
         {dogImages.map((img) => (
           <Image
