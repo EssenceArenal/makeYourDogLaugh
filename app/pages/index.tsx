@@ -4,7 +4,7 @@ import Image from "next/image";
 import { auth } from "../../src/lib/firebase";
 import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import contentJson from "../../data/content";
+import contentJson from "../../data/content.ts";
 
 // Type for content.json
 interface ContentData {
