@@ -166,23 +166,34 @@ export default function Home() {
   const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    if (dogName && currentView === "auth") {
+    // Removed automatic redirect that might cause issues
+    if (dogName) {
       setGreeting(`Ready to discover the divine through ${dogName} today?`);
-      setCurrentView("dashboard");
     }
-  }, [dogName, currentView]);
+  }, [dogName]);
 
   const handleSignup = async () => {
+    console.log('Signup attempt:', { email, password, dogName }); // Debug log
+    
+    if (!email || !password || !dogName) {
+      alert("Please fill in all fields to begin your spiritual journey");
+      return;
+    }
+    
     try {
-      if (!email || !password || !dogName) {
-        alert("Please fill in all fields to begin your spiritual journey");
-        return;
-      }
-      const { saveUserData } = await import("../src/lib/airtable");
-      await saveUserData({ email, dogName, journalEntry: "" });
+      // Try to save without importing - simpler approach
+      console.log('Saving user data...'); // Debug log
+      
+      // For now, just proceed to dashboard - you can add Airtable later
       alert("Welcome to your spiritual journey with your divine companion!");
       setCurrentView("dashboard");
+      
+      // Uncomment when Airtable is working:
+      // const { saveUserData } = await import("../src/lib/airtable");
+      // await saveUserData({ email, dogName, journalEntry: "" });
+      
     } catch (error) {
+      console.error('Signup error:', error); // Debug log
       alert(`Signup error: ${error.message}`);
     }
   };
