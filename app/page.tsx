@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+// Removed Image import since we're not using images
 
 // Spiritual content based on your book
 const spiritualExercises = [
@@ -144,6 +145,8 @@ const reflectionPrompts = [
   "How did your dog help you practice forgiveness?"
 ];
 
+// Removed dog images array - no longer needed
+
 export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -166,50 +169,34 @@ export default function Home() {
   }, [dogName, currentView]);
 
   const handleSignup = async () => {
-    if (!email || !password || !dogName) {
-      alert("Please fill in all fields to begin your spiritual journey");
-      return;
-    }
-    
     try {
-      const response = await fetch('/api/airtable', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          dogName,
-          password,
-          signupDate: new Date().toISOString(),
-          completedExercises: 0,
-          streak: 0
-        }),
-      });
-      
-      if (response.ok) {
-        alert("Welcome to your spiritual journey with your divine companion!");
-      } else {
-        alert("Signup successful! Welcome to your journey!");
+      if (!email || !password || !dogName) {
+        alert("Please fill in all fields to begin your spiritual journey");
+        return;
       }
+      const { saveUserData } = await import("../src/lib/airtable");
+      await saveUserData({ email, dogName, journalEntry: "" });
+      alert("Welcome to your spiritual journey with your divine companion!");
       setCurrentView("dashboard");
     } catch (error) {
-      console.error('Signup error:', error);
-      alert("Welcome to your spiritual journey! (Data saved locally)");
-      setCurrentView("dashboard");
+      alert(`Signup error: ${error.message}`);
     }
   };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Please fill in your credentials");
-      return;
-    }
-    if (dogName) {
-      setCurrentView("dashboard");
-      alert("Welcome back to your sacred practice!");
-    } else {
-      alert("Please enter your dog's name");
+    try {
+      if (!email || !password) {
+        alert("Please fill in your credentials");
+        return;
+      }
+      if (dogName) {
+        setCurrentView("dashboard");
+        alert("Welcome back to your sacred practice!");
+      } else {
+        alert("Please enter your dog's name");
+      }
+    } catch (error) {
+      alert(`Login error: ${error.message}`);
     }
   };
 
@@ -230,43 +217,21 @@ export default function Home() {
   const saveReflection = async () => {
     if (dailyReflection.trim()) {
       try {
-        await fetch('/api/airtable', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            reflection: dailyReflection,
-            reflectionPrompt,
-            date: new Date().toISOString()
-          }),
+        const { saveUserData } = await import("../src/lib/airtable");
+        await saveUserData({ 
+          email, 
+          dogName, 
+          journalEntry: dailyReflection,
+          reflection: reflectionPrompt,
+          completedExercises: completedExercises.length 
         });
         alert("Reflection saved with love");
+        setDailyReflection("");
+        setCurrentView("dashboard");
       } catch (error) {
         alert("Reflection saved in your heart");
+        setCurrentView("dashboard");
       }
-      setDailyReflection("");
-      setCurrentView("dashboard");
-    }
-  };
-
-  const saveJournalEntry = async () => {
-    if (journalEntry.trim()) {
-      try {
-        await fetch('/api/airtable', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            journalEntry,
-            date: new Date().toISOString()
-          }),
-        });
-        alert("Joy captured and saved!");
-      } catch (error) {
-        alert("Joy captured in your heart!");
-      }
-      setJournalEntry("");
-      setCurrentView("dashboard");
     }
   };
 
@@ -291,6 +256,7 @@ export default function Home() {
           <div className="p-6 rounded-3xl shadow-lg" style={{backgroundColor: 'rgba(255, 255, 255, 0.8)'}}>
             <input
               placeholder="Email"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-4 mb-4 rounded-xl border-2 focus:outline-none focus:ring-2"
@@ -298,7 +264,7 @@ export default function Home() {
             />
             <input
               placeholder="Password"
-              type="password"
+              type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-4 mb-4 rounded-xl border-2 focus:outline-none focus:ring-2"
@@ -306,6 +272,7 @@ export default function Home() {
             />
             <input
               placeholder="Your Dog's Sacred Name"
+              type="text"
               value={dogName}
               onChange={(e) => setDogName(e.target.value)}
               className="w-full p-4 mb-6 rounded-xl border-2 focus:outline-none focus:ring-2"
@@ -342,16 +309,8 @@ export default function Home() {
             <h1 className="text-2xl font-bold mb-2" style={{color: '#4F200D'}}>
               Ready to laugh with {dogName} today?
             </h1>
-            <div className="flex justify-center space-x-2 mb-4">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl" style={{backgroundColor: '#FF9A00'}}>
-                🐕
-              </div>
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl" style={{backgroundColor: '#FFD93D'}}>
-                🐶
-              </div>
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl" style={{backgroundColor: '#FF9A00'}}>
-                🦮
-              </div>
+            <div className="flex justify-center mb-4">
+              <div className="text-6xl">🐕</div>
             </div>
             <div className="flex justify-center space-x-6">
               <div className="text-center">
@@ -678,11 +637,22 @@ export default function Home() {
           </div>
 
           <button
-            onClick={saveJournalEntry}
+            onClick={async () => {
+              try {
+                const { saveUserData } = await import("../src/lib/airtable");
+                await saveUserData({ email, dogName, journalEntry });
+                alert("Joy captured and saved!");
+                setJournalEntry("");
+                setCurrentView("dashboard");
+              } catch (error) {
+                alert("Joy saved in your heart");
+                setCurrentView("dashboard");
+              }
+            }}
             className="w-full p-4 rounded-2xl font-bold transform hover:scale-105 transition-all shadow-md"
             style={{backgroundColor: '#FF9A00', color: '#F6F1E9'}}
           >
-            Save Sacred Memory
+            Save Today's Joy
           </button>
         </div>
       </div>
@@ -705,133 +675,135 @@ export default function Home() {
             <h1 className="text-2xl font-bold" style={{color: '#4F200D'}}>Soul Growth Journey</h1>
           </div>
 
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl text-center" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}>
-                <div className="text-3xl font-bold mb-1" style={{color: '#FF9A00'}}>{completedExercises.length}</div>
+          {/* Progress Stats */}
+          <div className="p-6 rounded-3xl shadow-lg mb-6" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}>
+            <h2 className="text-xl font-bold mb-4 text-center" style={{color: '#4F200D'}}>
+              Your Sacred Progress
+            </h2>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="text-center p-4 rounded-xl" style={{backgroundColor: '#FFD93D'}}>
+                <div className="text-3xl font-bold" style={{color: '#4F200D'}}>{completedExercises.length}</div>
                 <div className="text-sm" style={{color: '#4F200D'}}>Practices Completed</div>
               </div>
-              <div className="p-4 rounded-2xl text-center" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}>
-                <div className="text-3xl font-bold mb-1" style={{color: '#FF9A00'}}>{streak}</div>
-                <div className="text-sm" style={{color: '#4F200D'}}>Day Streak</div>
+              <div className="text-center p-4 rounded-xl" style={{backgroundColor: '#FF9A00'}}>
+                <div className="text-3xl font-bold" style={{color: '#F6F1E9'}}>{streak}</div>
+                <div className="text-sm" style={{color: '#F6F1E9'}}>Day Streak</div>
               </div>
             </div>
 
-            {/* Progress Overview */}
-            <div className="p-6 rounded-3xl" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}>
-              <h3 className="font-bold mb-4" style={{color: '#4F200D'}}>Your Sacred Journey with {dogName}</h3>
-              
-              {/* Progress Categories */}
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium" style={{color: '#4F200D'}}>Sacred Connection</span>
-                    <span className="text-sm" style={{color: '#FF9A00'}}>
-                      {completedExercises.filter(id => [1,2,3].includes(id)).length}/3
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-2" style={{backgroundColor: '#FFD93D'}}>
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300" 
-                      style={{
-                        backgroundColor: '#FF9A00',
-                        width: `${(completedExercises.filter(id => [1,2,3].includes(id)).length / 3) * 100}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium" style={{color: '#4F200D'}}>Transformation</span>
-                    <span className="text-sm" style={{color: '#FF9A00'}}>
-                      {completedExercises.filter(id => [4,5,6].includes(id)).length}/3
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-2" style={{backgroundColor: '#FFD93D'}}>
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300" 
-                      style={{
-                        backgroundColor: '#FF9A00',
-                        width: `${(completedExercises.filter(id => [4,5,6].includes(id)).length / 3) * 100}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium" style={{color: '#4F200D'}}>Advanced Training</span>
-                    <span className="text-sm" style={{color: '#FF9A00'}}>
-                      {completedExercises.filter(id => [7,8,9].includes(id)).length}/3
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-2" style={{backgroundColor: '#FFD93D'}}>
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300" 
-                      style={{
-                        backgroundColor: '#FF9A00',
-                        width: `${(completedExercises.filter(id => [7,8,9].includes(id)).length / 3) * 100}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium" style={{color: '#4F200D'}}>Joy & Spiritual Path</span>
-                    <span className="text-sm" style={{color: '#FF9A00'}}>
-                      {completedExercises.filter(id => [10,11,12].includes(id)).length}/3
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-2" style={{backgroundColor: '#FFD93D'}}>
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300" 
-                      style={{
-                        backgroundColor: '#FF9A00',
-                        width: `${(completedExercises.filter(id => [10,11,12].includes(id)).length / 3) * 100}%`
-                      }}
-                    ></div>
-                  </div>
-                </div>
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <div className="flex justify-between mb-2">
+                <span className="text-sm font-medium" style={{color: '#4F200D'}}>
+                  Spiritual Journey Progress
+                </span>
+                <span className="text-sm" style={{color: '#FF9A00'}}>
+                  {Math.round((completedExercises.length / spiritualExercises.length) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="h-3 rounded-full transition-all duration-300"
+                  style={{
+                    backgroundColor: '#FF9A00',
+                    width: `${(completedExercises.length / spiritualExercises.length) * 100}%`
+                  }}
+                ></div>
               </div>
             </div>
 
-            {/* Achievements */}
-            <div className="p-6 rounded-3xl" style={{backgroundColor: 'rgba(255, 154, 0, 0.1)'}}>
-              <h3 className="font-bold mb-4" style={{color: '#4F200D'}}>Sacred Achievements</h3>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div className="text-2xl mb-1">{completedExercises.length >= 1 ? '🌟' : '⭐'}</div>
-                  <div className="text-xs" style={{color: '#4F200D'}}>First Step</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl mb-1">{completedExercises.length >= 5 ? '🏆' : '🏅'}</div>
-                  <div className="text-xs" style={{color: '#4F200D'}}>Dedicated</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl mb-1">{completedExercises.length >= 12 ? '👑' : '💎'}</div>
-                  <div className="text-xs" style={{color: '#4F200D'}}>Master</div>
-                </div>
+            {/* Spiritual Level */}
+            <div className="text-center p-4 rounded-xl" style={{backgroundColor: 'rgba(255, 154, 0, 0.1)'}}>
+              <h3 className="font-bold mb-2" style={{color: '#4F200D'}}>Current Spiritual Level</h3>
+              <div className="text-2xl font-bold mb-1" style={{color: '#FF9A00'}}>
+                {completedExercises.length < 3 ? "Awakening Soul" :
+                 completedExercises.length < 6 ? "Growing Spirit" :
+                 completedExercises.length < 9 ? "Enlightened Heart" :
+                 "Divine Companion"}
               </div>
-            </div>
-
-            {/* Encouragement Message */}
-            <div className="p-4 rounded-2xl text-center" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}>
-              <p className="text-sm italic" style={{color: '#4F200D'}}>
-                {completedExercises.length === 0 && "Every spiritual journey begins with a single paw step. Your dog is ready when you are."}
-                {completedExercises.length > 0 && completedExercises.length < 6 && "Beautiful progress! Your dog is proud of your dedication to growth."}
-                {completedExercises.length >= 6 && completedExercises.length < 12 && "You're deepening into the sacred bond. Your transformation is inspiring."}
-                {completedExercises.length === 12 && "Congratulations! You've completed all the sacred practices. You and your dog are true spiritual partners."}
+              <p className="text-xs" style={{color: '#4F200D'}}>
+                {completedExercises.length < 3 ? "Beginning your sacred journey with your furry teacher" :
+                 completedExercises.length < 6 ? "Deepening your spiritual connection through play and presence" :
+                 completedExercises.length < 9 ? "Embodying love and joy in your daily practice" :
+                 "Living as one with your divine four-legged master"}
               </p>
             </div>
+          </div>
+
+          {/* Achievements */}
+          <div className="p-6 rounded-3xl shadow-lg mb-6" style={{backgroundColor: 'rgba(255, 255, 255, 0.9)'}}>
+            <h3 className="font-bold mb-4" style={{color: '#4F200D'}}>Sacred Achievements</h3>
+            <div className="space-y-3">
+              <div className={`flex items-center p-3 rounded-xl ${completedExercises.length >= 1 ? 'opacity-100' : 'opacity-50'}`} 
+                   style={{backgroundColor: '#FFD93D'}}>
+                <span className="text-2xl mr-3">{completedExercises.length >= 1 ? '🌟' : '⭐'}</span>
+                <div>
+                  <div className="font-semibold" style={{color: '#4F200D'}}>First Step Taken</div>
+                  <div className="text-xs" style={{color: '#4F200D'}}>Completed your first sacred practice</div>
+                </div>
+              </div>
+
+              <div className={`flex items-center p-3 rounded-xl ${completedExercises.length >= 3 ? 'opacity-100' : 'opacity-50'}`} 
+                   style={{backgroundColor: '#FF9A00'}}>
+                <span className="text-2xl mr-3">{completedExercises.length >= 3 ? '🎭' : '🎪'}</span>
+                <div>
+                  <div className="font-semibold" style={{color: '#F6F1E9'}}>Laughter Activated</div>
+                  <div className="text-xs" style={{color: '#F6F1E9'}}>Discovered joy in 3 practices</div>
+                </div>
+              </div>
+
+              <div className={`flex items-center p-3 rounded-xl ${completedExercises.length >= 6 ? 'opacity-100' : 'opacity-50'}`} 
+                   style={{backgroundColor: '#4F200D'}}>
+                <span className="text-2xl mr-3">{completedExercises.length >= 6 ? '💖' : '🤍'}</span>
+                <div>
+                  <div className="font-semibold" style={{color: '#F6F1E9'}}>Heart Healer</div>
+                  <div className="text-xs" style={{color: '#F6F1E9'}}>Opened your heart through 6 practices</div>
+                </div>
+              </div>
+
+              <div className={`flex items-center p-3 rounded-xl ${completedExercises.length >= 12 ? 'opacity-100' : 'opacity-50'}`} 
+                   style={{backgroundColor: 'rgba(255, 217, 61, 0.8)'}}>
+                <span className="text-2xl mr-3">{completedExercises.length >= 12 ? '👑' : '🎯'}</span>
+                <div>
+                  <div className="font-semibold" style={{color: '#4F200D'}}>Spiritual Master</div>
+                  <div className="text-xs" style={{color: '#4F200D'}}>Completed all sacred practices</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Next Steps */}
+          <div className="p-4 rounded-2xl" style={{backgroundColor: 'rgba(255, 154, 0, 0.1)'}}>
+            <h3 className="font-bold mb-2" style={{color: '#4F200D'}}>Continue Your Journey</h3>
+            <p className="text-sm mb-3" style={{color: '#4F200D'}}>
+              {completedExercises.length < spiritualExercises.length 
+                ? `You have ${spiritualExercises.length - completedExercises.length} more practices to discover. Each one brings you closer to divine joy with ${dogName}.`
+                : `Congratulations! You've completed all practices. Continue your daily journey of love, laughter, and spiritual growth with ${dogName}.`
+              }
+            </p>
+            <button
+              onClick={() => setCurrentView(completedExercises.length < spiritualExercises.length ? "exercises" : "dashboard")}
+              className="w-full p-3 rounded-xl font-bold"
+              style={{backgroundColor: '#FF9A00', color: '#F6F1E9'}}
+            >
+              {completedExercises.length < spiritualExercises.length ? "Continue Practices" : "Return to Dashboard"}
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Default return
-  return null;
+  // Default return (fallback)
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #F6F1E9 0%, #FFD93D 100%)'}}>
+      <div className="text-center">
+        <div className="text-6xl mb-4">🐕</div>
+        <h1 className="text-2xl font-bold" style={{color: '#4F200D'}}>
+          Loading your spiritual journey...
+        </h1>
+      </div>
+    </div>
+  );
 }
