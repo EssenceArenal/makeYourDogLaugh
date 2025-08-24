@@ -6,6 +6,9 @@ import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import content from "../../src/data/content";
 
+// Remove this line completely:
+// const content = contentJson as unknown as ContentData;
+
 const { exercises, quotes } = content;
 
 const content = contentJson as unknown as ContentData;
