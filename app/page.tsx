@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-// Removed Image import since we're not using images
+import Image from "next/image";
 
 // Spiritual content based on your book
 const spiritualExercises = [
@@ -145,7 +145,11 @@ const reflectionPrompts = [
   "How did your dog help you practice forgiveness?"
 ];
 
-// Removed dog images array - no longer needed
+const dogImages = [
+  "dog.jpg",
+  "dog2.jpg", 
+  "dog3.jpg",
+];
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -257,6 +261,7 @@ export default function Home() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="w-full p-4 mb-4 rounded-xl border-2 focus:outline-none focus:ring-2"
               style={{borderColor: '#FFD93D', backgroundColor: '#F6F1E9'}}
             />
@@ -265,6 +270,7 @@ export default function Home() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               className="w-full p-4 mb-4 rounded-xl border-2 focus:outline-none focus:ring-2"
               style={{borderColor: '#FFD93D', backgroundColor: '#F6F1E9'}}
             />
@@ -273,6 +279,8 @@ export default function Home() {
               type="text"
               value={dogName}
               onChange={(e) => setDogName(e.target.value)}
+              autoComplete="off"
+              maxLength={50}
               className="w-full p-4 mb-6 rounded-xl border-2 focus:outline-none focus:ring-2"
               style={{borderColor: '#FFD93D', backgroundColor: '#F6F1E9'}}
             />
@@ -307,8 +315,18 @@ export default function Home() {
             <h1 className="text-2xl font-bold mb-2" style={{color: '#4F200D'}}>
               Ready to laugh with {dogName} today?
             </h1>
-            <div className="flex justify-center mb-4">
-              <div className="text-6xl">🐕</div>
+            <div className="flex justify-center space-x-2 mb-4">
+              {dogImages.map((img, index) => (
+                <Image
+                  key={img}
+                  src={`/images/dogs/${img}`}
+                  alt="Sacred companion"
+                  width={60}
+                  height={60}
+                  className="rounded-full border-2 shadow-md"
+                  style={{borderColor: '#FF9A00'}}
+                />
+              ))}
             </div>
             <div className="flex justify-center space-x-6">
               <div className="text-center">
