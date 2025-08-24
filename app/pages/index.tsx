@@ -1,10 +1,8 @@
 // pages/index.tsx
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import path from "path";
-import fs from "fs";
-import { GetStaticProps } from "next";
-import { exercises, quotes } from "../data/content";
+import content from "../../data/content.json"; // ✅ Direct import
+const { exercises, quotes } = content;
 import { auth } from "../../src/lib/firebase";
 import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
