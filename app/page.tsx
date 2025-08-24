@@ -146,9 +146,23 @@ const reflectionPrompts = [
 ];
 
 const dogImages = [
-  "dog.jpg",
+  "dog1.jpg",
   "dog2.jpg", 
   "dog3.jpg",
+  "dog4.jpg",
+  "dog5.jpg",
+  "dog6.jpg",
+  "dog7.jpg",
+  "dog8.jpg",
+  "dog9.jpg",
+  "dog10.jpg",
+  "dog11.jpg",
+  "dog12.jpg",
+  "dog13.jpg",
+  "dog14.jpg",
+  "dog15.jpg",
+  "dog16.jpg",
+  "dog17.jpg"
 ];
 
 export default function Home() {
@@ -199,20 +213,19 @@ export default function Home() {
   };
 
   const handleLogin = async () => {
-    try {
-      if (!email || !password) {
-        alert("Please fill in your credentials");
-        return;
-      }
-      if (dogName) {
-        setCurrentView("dashboard");
-        alert("Welcome back to your sacred practice!");
-      } else {
-        alert("Please enter your dog's name");
-      }
-    } catch (error) {
-      alert(`Login error: ${error.message}`);
+    console.log('Login attempt:', { email, password, dogName }); // Debug log
+    
+    if (!email || !password) {
+      alert("Please fill in your credentials");
+      return;
     }
+    if (!dogName) {
+      alert("Please enter your dog's name");
+      return;
+    }
+    
+    setCurrentView("dashboard");
+    alert("Welcome back to your sacred practice!");
   };
 
   const completeExercise = (exerciseId) => {
@@ -289,7 +302,10 @@ export default function Home() {
               placeholder="Your Dog's Sacred Name"
               type="text"
               value={dogName}
-              onChange={(e) => setDogName(e.target.value)}
+              onChange={(e) => {
+                console.log('Dog name input:', e.target.value); // Debug log
+                setDogName(e.target.value);
+              }}
               autoComplete="off"
               maxLength={50}
               className="w-full p-4 mb-6 rounded-xl border-2 focus:outline-none focus:ring-2"
@@ -328,15 +344,19 @@ export default function Home() {
             </h1>
             <div className="flex justify-center space-x-2 mb-4">
               {dogImages.map((img, index) => (
-                <Image
-                  key={img}
-                  src={`/images/dogs/${img}`}
-                  alt="Sacred companion"
-                  width={60}
-                  height={60}
-                  className="rounded-full border-2 shadow-md"
-                  style={{borderColor: '#FF9A00'}}
-                />
+                <div key={index} className="w-16 h-16 rounded-full overflow-hidden border-2 shadow-md" style={{borderColor: '#FF9A00'}}>
+                  <Image
+                    src={`/images/dogs/${img}`}
+                    alt={`Sacred companion ${index + 1}`}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.log(`Failed to load image: /images/dogs/${img}`);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
               ))}
             </div>
             <div className="flex justify-center space-x-6">
