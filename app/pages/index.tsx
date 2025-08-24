@@ -1,41 +1,33 @@
 // app/pages/index.tsx
-"use client"; // Needed because we use useState and useEffect
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import content from "../../data/content.json";
 import { auth } from "../../src/lib/firebase";
 import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import contentJson from "../../data/content.json";
 
+// Types for your JSON content
 interface ContentData {
   exercises: { description: string }[];
   quotes: string[];
 }
 
-const typedContent = content as unknown as ContentData;
-const { exercises, quotes } = typedContent;
+const content = contentJson as unknown as ContentData;
+const { exercises, quotes } = content;
+
+// Hardcoded dog images from public/images/dogs
+const dogImages = [
+  "dog1.jpg",
+  "dog2.jpg",
+  "dog3.jpg",
+  // Add all your other images here
+];
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dogName, setDogName] = useState("");
   const [greeting, setGreeting] = useState("");
-  const [dogImages, setDogImages] = useState<string[]>([]);
-
-  // Load dog images dynamically from public/images/dogs
-  useEffect(() => {
-    const importAllImages = () => {
-      const context = require.context("../../public/images/dogs", false, /\.(png|jpe?g|svg)$/);
-      return context.keys().map((key: string) => key.replace("./", ""));
-    };
-    try {
-      setDogImages(importAllImages());
-    } catch {
-      // fallback if require.context fails (Vercel)
-      setDogImages(["dog1.jpg", "dog2.jpg", "dog3.jpg"]); 
-    }
-  }, []);
 
   useEffect(() => {
     if (dogName) setGreeting(`Ready to laugh with ${dogName} today?`);
@@ -107,7 +99,7 @@ export default function Home() {
 
       {greeting && <h2 className="text-xl mb-2">{greeting}</h2>}
 
-      {/* Render all dog images dynamically */}
+      {/* Render all dog images */}
       <div className="flex flex-wrap gap-2 mb-4">
         {dogImages.map((img) => (
           <Image
