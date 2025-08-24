@@ -4,13 +4,9 @@ import Image from "next/image";
 import { auth } from "../../src/lib/firebase";
 import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import contentJson from "../../data/content";
+import content from "../../src/data/content";
 
-// Type for content.json
-interface ContentData {
-  exercises: { description: string }[];
-  quotes: string[];
-}
+const { exercises, quotes } = content;
 
 const content = contentJson as unknown as ContentData;
 const { exercises, quotes } = content;
