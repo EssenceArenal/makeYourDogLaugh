@@ -17,7 +17,7 @@ const { exercises, quotes } = content;
 
 // Hardcoded dog images from public/images/dogs
 const dogImages = [
-  "dog1.jpg",
+  "dog.jpg",
   "dog2.jpg",
   "dog3.jpg",
   // Add all your other image filenames here
