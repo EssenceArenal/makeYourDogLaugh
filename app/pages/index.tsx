@@ -1,28 +1,41 @@
-// pages/index.tsx
+// app/pages/index.tsx
+"use client"; // Needed because we use useState and useEffect
+
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import content from "../../data/content.json"; // ✅ Direct import
-const { exercises, quotes } = content;
+import content from "../../data/content.json";
 import { auth } from "../../src/lib/firebase";
 import { saveUserData } from "../../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
-interface Props {
-  dogImages: string[];
+interface ContentData {
+  exercises: { description: string }[];
+  quotes: string[];
 }
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
-  // Read all files from public/images/dogs
-  const imagesDir = path.join(process.cwd(), "public/images/dogs");
-  const dogImages = fs.existsSync(imagesDir) ? fs.readdirSync(imagesDir) : [];
-  return { props: { dogImages } };
-};
+const typedContent = content as unknown as ContentData;
+const { exercises, quotes } = typedContent;
 
-export default function Home({ dogImages }: Props) {
+export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dogName, setDogName] = useState("");
   const [greeting, setGreeting] = useState("");
+  const [dogImages, setDogImages] = useState<string[]>([]);
+
+  // Load dog images dynamically from public/images/dogs
+  useEffect(() => {
+    const importAllImages = () => {
+      const context = require.context("../../public/images/dogs", false, /\.(png|jpe?g|svg)$/);
+      return context.keys().map((key: string) => key.replace("./", ""));
+    };
+    try {
+      setDogImages(importAllImages());
+    } catch {
+      // fallback if require.context fails (Vercel)
+      setDogImages(["dog1.jpg", "dog2.jpg", "dog3.jpg"]); 
+    }
+  }, []);
 
   useEffect(() => {
     if (dogName) setGreeting(`Ready to laugh with ${dogName} today?`);
