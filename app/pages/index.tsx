@@ -11,8 +11,6 @@ import content from "../../src/data/content";
 
 const { exercises, quotes } = content;
 
-const content = contentJson as unknown as ContentData;
-const { exercises, quotes } = content;
 
 // Hardcoded dog images from public/images/dogs
 const dogImages = [
