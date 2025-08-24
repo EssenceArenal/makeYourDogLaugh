@@ -195,20 +195,25 @@ export default function Home() {
     }
     
     try {
-      // Try to save without importing - simpler approach
-      console.log('Saving user data...'); // Debug log
+      console.log('Attempting to import Airtable...'); // Debug log
+      const { saveUserData } = await import("../src/lib/airtable");
+      console.log('Airtable imported successfully'); // Debug log
       
-      // For now, just proceed to dashboard - you can add Airtable later
+      const userData = { email, dogName, journalEntry: "" };
+      console.log('Saving user data:', userData); // Debug log
+      
+      await saveUserData(userData);
+      console.log('User data saved successfully'); // Debug log
+      
       alert("Welcome to your spiritual journey with your divine companion!");
       setCurrentView("dashboard");
       
-      // Uncomment when Airtable is working:
-      // const { saveUserData } = await import("../src/lib/airtable");
-      // await saveUserData({ email, dogName, journalEntry: "" });
-      
     } catch (error) {
-      console.error('Signup error:', error); // Debug log
-      alert(`Signup error: ${error.message}`);
+      console.error('Signup error details:', error); // Detailed error log
+      alert(`Signup error: ${error.message || 'Unknown error occurred'}`);
+      
+      // Still allow them to proceed to test the app
+      setCurrentView("dashboard");
     }
   };
 
@@ -245,17 +250,25 @@ export default function Home() {
   const saveReflection = async () => {
     if (dailyReflection.trim()) {
       try {
+        console.log('Saving reflection...'); // Debug log
         const { saveUserData } = await import("../src/lib/airtable");
-        await saveUserData({ 
+        
+        const reflectionData = {
           email, 
           dogName, 
           journalEntry: `${reflectionPrompt}\n\n${dailyReflection}`
-        });
+        };
+        console.log('Reflection data:', reflectionData); // Debug log
+        
+        await saveUserData(reflectionData);
+        console.log('Reflection saved successfully'); // Debug log
+        
         alert("Reflection saved with love");
         setDailyReflection("");
         setCurrentView("dashboard");
       } catch (error) {
-        alert("Reflection saved in your heart");
+        console.error('Reflection save error:', error); // Debug log
+        alert("Reflection saved in your heart (error occurred)");
         setCurrentView("dashboard");
       }
     }
@@ -342,18 +355,19 @@ export default function Home() {
             <h1 className="text-2xl font-bold mb-2" style={{color: '#4F200D'}}>
               Ready to laugh with {dogName} today?
             </h1>
-            <div className="flex justify-center space-x-2 mb-4">
+            <div className="grid grid-cols-6 gap-2 mb-4 max-h-32 overflow-hidden">
               {dogImages.map((img, index) => (
-                <div key={index} className="w-16 h-16 rounded-full overflow-hidden border-2 shadow-md" style={{borderColor: '#FF9A00'}}>
+                <div key={index} className="w-12 h-12 rounded-full overflow-hidden border-2 shadow-md" style={{borderColor: '#FF9A00'}}>
                   <Image
                     src={`/images/dogs/${img}`}
                     alt={`Sacred companion ${index + 1}`}
-                    width={64}
-                    height={64}
+                    width={48}
+                    height={48}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       console.log(`Failed to load image: /images/dogs/${img}`);
-                      e.target.style.display = 'none';
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
                     }}
                   />
                 </div>
@@ -686,13 +700,21 @@ export default function Home() {
           <button
             onClick={async () => {
               try {
+                console.log('Saving journal entry...'); // Debug log
                 const { saveUserData } = await import("../src/lib/airtable");
-                await saveUserData({ email, dogName, journalEntry });
+                
+                const journalData = { email, dogName, journalEntry };
+                console.log('Journal data:', journalData); // Debug log
+                
+                await saveUserData(journalData);
+                console.log('Journal saved successfully'); // Debug log
+                
                 alert("Joy captured and saved!");
                 setJournalEntry("");
                 setCurrentView("dashboard");
               } catch (error) {
-                alert("Joy saved in your heart");
+                console.error('Journal save error:', error); // Debug log
+                alert("Joy saved in your heart (error occurred)");
                 setCurrentView("dashboard");
               }
             }}
