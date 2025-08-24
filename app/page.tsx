@@ -1,24 +1,14 @@
 "use client";
-// app/page.tsx
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { auth } from "../src/lib/firebase";
-import { saveUserData } from "../src/lib/airtable";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import content from "../src/data/content";
-
-// Remove this line completely:
-// const content = contentJson as unknown as ContentData;
 
 const { exercises, quotes } = content;
 
-
-// Hardcoded dog images from public/images/dogs
 const dogImages = [
   "dog.jpg",
   "dog2.jpg",
   "dog3.jpg",
-  // Add all your other image filenames here
 ];
 
 export default function Home() {
@@ -33,6 +23,16 @@ export default function Home() {
 
   const handleSignup = async () => {
     try {
+      const [
+        { auth },
+        { saveUserData },
+        { createUserWithEmailAndPassword }
+      ] = await Promise.all([
+        import("../src/lib/firebase"),
+        import("../src/lib/airtable"),
+        import("firebase/auth")
+      ]);
+      
       await createUserWithEmailAndPassword(auth, email, password);
       await saveUserData({ email, dogName, journalEntry: "" });
       alert("Signed up successfully!");
@@ -44,6 +44,14 @@ export default function Home() {
 
   const handleLogin = async () => {
     try {
+      const [
+        { auth },
+        { signInWithEmailAndPassword }
+      ] = await Promise.all([
+        import("../src/lib/firebase"),
+        import("firebase/auth")
+      ]);
+      
       await signInWithEmailAndPassword(auth, email, password);
       alert("Logged in successfully!");
       setGreeting(`Ready to laugh with ${dogName} today?`);
@@ -58,7 +66,6 @@ export default function Home() {
   return (
     <div className="p-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">Make Your Dog Laugh</h1>
-
       {!greeting && (
         <>
           <input
@@ -94,10 +101,7 @@ export default function Home() {
           </button>
         </>
       )}
-
       {greeting && <h2 className="text-xl mb-2">{greeting}</h2>}
-
-      {/* Render all dog images */}
       <div className="flex flex-wrap gap-2 mb-4">
         {dogImages.map((img) => (
           <Image
@@ -110,10 +114,8 @@ export default function Home() {
           />
         ))}
       </div>
-
       <h2 className="text-lg font-semibold mt-4">Today's Exercise</h2>
       <p>{randomExercise.description}</p>
-
       <h2 className="text-lg font-semibold mt-4">Quote</h2>
       <p>{randomQuote}</p>
     </div>
