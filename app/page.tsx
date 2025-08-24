@@ -221,9 +221,7 @@ export default function Home() {
         await saveUserData({ 
           email, 
           dogName, 
-          journalEntry: dailyReflection,
-          reflection: reflectionPrompt,
-          completedExercises: completedExercises.length 
+          journalEntry: `${reflectionPrompt}\n\n${dailyReflection}`
         });
         alert("Reflection saved with love");
         setDailyReflection("");
