@@ -1,10 +1,10 @@
 // app/pages/index.tsx
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { auth } from "../../src/lib/firebase";
-import { saveUserData } from "../../src/lib/airtable";
+import { auth } from "../src/lib/firebase";
+import { saveUserData } from "../src/lib/airtable";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import content from "../../src/data/content";
+import content from "../src/data/content";
 
 // Remove this line completely:
 // const content = contentJson as unknown as ContentData;
